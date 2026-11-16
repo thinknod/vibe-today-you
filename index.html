@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>오늘은 너로 | 고민될 때 돌리는 돌림판</title>
+  <meta name="description" content="점심 메뉴, 발표 순서, 이번 주 당번. 고민될 때 돌리는 돌림판. 주소 하나로 내 돌림판을 팀에 보내요.">
+
+  <!-- 링크 미리보기(카카오톡, 슬랙 등). 배포한 뒤 og:image와 og:url을 내 주소로 바꾸면 미리보기가 확실해요
+       예: https://today-you.vercel.app/og.png -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="오늘은 너로">
+  <meta property="og:description" content="고민될 때 돌리는 돌림판. 점심, 발표 순서, 당번을 10초 만에.">
+  <meta property="og:image" content="og.png">
+  <meta property="og:url" content="">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <a class="brand" href="./" aria-label="처음 화면으로">
+        <img src="favicon.svg" alt="" width="28" height="28">
+        <span id="siteTitle">오늘은 너로</span>
+      </a>
+      <div class="top-actions">
+        <button type="button" class="chip-btn" id="openEdit" aria-controls="panel">항목 바꾸기</button>
+        <button type="button" class="chip-btn" id="openShare" aria-controls="panel">보내기</button>
+      </div>
+    </header>
+
+    <main class="stage">
+      <div class="question">
+        <p class="eyebrow" id="subtitle">고민될 때 돌리는 돌림판</p>
+        <h1 id="question">오늘 점심은?</h1>
+        <div class="tabs" role="tablist" aria-label="주제" id="tabs"></div>
+      </div>
+
+      <div class="wheel-wrap">
+        <div class="pointer" aria-hidden="true"></div>
+        <svg id="wheel" viewBox="0 0 400 400" role="img" aria-label="돌림판"></svg>
+        <button type="button" class="hub" id="hub" aria-label="돌리기"></button>
+
+        <div class="result" id="result" hidden>
+          <div class="result-card" role="dialog" aria-modal="false" aria-labelledby="resultWord">
+            <p class="result-pre">오늘은</p>
+            <p class="result-word" id="resultWord"></p>
+            <p class="result-post" id="resultPost">로 정했어요</p>
+            <div class="result-actions">
+              <button type="button" class="btn" id="again">다시 돌리기</button>
+              <div class="row2">
+                <button type="button" class="btn line" id="exclude">빼고 돌리기</button>
+                <button type="button" class="btn line" id="copyResult">결과 복사</button>
+              </div>
+              <button type="button" class="text-btn" id="closeResult">돌림판으로</button>
+            </div>
+          </div>
+          <div class="confetti" id="confetti" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      <div class="spin-bar">
+        <button type="button" class="btn big" id="spin">돌리기 <span class="kbd" aria-hidden="true">스페이스</span></button>
+        <p class="hint" id="excludedHint" hidden></p>
+      </div>
+    </main>
+
+    <aside class="panel" id="panel" aria-label="항목과 공유">
+      <div class="sheet-head">
+        <span class="grabber" aria-hidden="true"></span>
+        <button type="button" class="text-btn close" id="closePanel">닫기</button>
+      </div>
+
+      <section class="block" id="editBlock" aria-labelledby="itemsTitle">
+        <h2 id="itemsTitle">항목 <span id="itemCount">6</span>개</h2>
+        <p class="small" id="itemsNote">2~12개, 이 기기에 저장돼요</p>
+        <ul class="items" id="items"></ul>
+        <form class="add" id="addForm" autocomplete="off">
+          <label class="sr-only" for="newItem">새 항목</label>
+          <input id="newItem" type="text" maxlength="12" placeholder="새 항목 (예: 돈가스)" enterkeyhint="done">
+          <button type="submit" class="btn small-btn">추가</button>
+        </form>
+        <p class="form-msg" id="formMsg" role="status" aria-live="polite"></p>
+        <button type="button" class="text-btn" id="resetItems">처음 목록으로 되돌리기</button>
+      </section>
+
+      <section class="block" aria-labelledby="historyTitle">
+        <h2 id="historyTitle">최근 결과</h2>
+        <ol class="history" id="history"></ol>
+      </section>
+
+      <section class="block" id="shareBlock" aria-labelledby="shareTitle">
+        <h2 id="shareTitle">내 돌림판 보내기</h2>
+        <p class="small">항목이 주소에 담겨요. 받은 사람은 같은 돌림판으로 시작해요.</p>
+        <p class="share-url" id="shareUrl"></p>
+        <div class="row2">
+          <button type="button" class="btn" id="copyUrl">주소 복사</button>
+          <button type="button" class="btn line" id="nativeShare">공유하기</button>
+        </div>
+        <details class="how">
+          <summary>서버 없이 어떻게 보내져요?</summary>
+          <p>주소 뒤 <code>?items=</code> 에 항목을 적어 보내요. 페이지가 그 주소를 읽어 돌림판을 만들어요. 사람 이름을 넣으면 주소에 이름이 그대로 담긴다는 점을 기억해 주세요.</p>
+        </details>
+      </section>
+
+      <p class="foot">경품 추첨처럼 결과에 이해관계가 걸린 곳에는 쓰지 마세요. 결과는 이 브라우저 안에서 뽑아요.</p>
+    </aside>
+    <div class="scrim" id="scrim" hidden></div>
+  </div>
+
+  <p class="toast" id="toast" role="status" aria-live="polite"></p>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
